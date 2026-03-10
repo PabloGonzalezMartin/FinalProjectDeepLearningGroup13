@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+wheels/
+sdist/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# Data
+# For this case we upload the data
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Models
+models/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.pb
+*.joblib
+
+# Logs
+logs/
+runs/
+mlruns/
+*.log
+wandb/
+lightning_logs/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MyPy
+.mypy_cache/
