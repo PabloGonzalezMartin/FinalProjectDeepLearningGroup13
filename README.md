@@ -62,7 +62,7 @@ pip install -r requirements.txt
 ```
 
 
-## Project Structure
+## Folder Structure
 
 ```
 your-repo/
@@ -81,3 +81,27 @@ your-repo/
 ├── requirements.txt
 └── README.md
 ```
+## Project Structure
+
+1. Benchmark model
+2. LSTM (Topic 6 -RNN)
+3. LSTM + Attention (Topic 7 - Attention Mechanism)
+  LSTM (igual que antes)
+      ↓
+  Attention layer 
+      ↓
+  Context vector → Linear → prediction
+4. Transformer / TFT *(Topic 7 — Transformer)
+Variable Selection Network
+      ↓
+  LSTM encoder (contexto local)
+      ↓
+  Multi-Head Self-Attention (contexto global)
+      ↓
+  Gated Residual Network
+      ↓
+  Quantile output → predice P10, P50, P90
+  
+## References
+
+https://github.com/zhouhaoyi/ETDataset
