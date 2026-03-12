@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from typing import Optional
 from statsmodels.tsa.stattools import acf, pacf
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 # ── Period aliases ──────────────────────────────────────────────────────────
 PERIOD_ALIASES: dict[str, str] = {
