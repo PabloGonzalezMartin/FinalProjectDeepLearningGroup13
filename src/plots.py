@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from typing import Optional
 from statsmodels.tsa.stattools import acf, pacf
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 # ── Period aliases ──────────────────────────────────────────────────────────
 PERIOD_ALIASES: dict[str, str] = {
@@ -732,3 +733,70 @@ def plot_acf_pacf(series, lags=40, title='ACF & PACF', confidence=0.05):
 
     fig.show()
     return fig, sig_df
+
+
+def plot_training_history(history: dict, title: str = "Model Training History") -> go.Figure:
+    """
+    Plot training and validation loss/metrics from model history.
+    
+    Parameters:
+    -----------
+    history : dict
+        Dictionary with keys like 'loss', 'val_loss', 'mae', 'val_mae', etc.
+    title : str
+        Title for the plot.
+    
+    Returns:
+    --------
+    fig : plotly.graph_objects.Figure
+        The plotly figure object.
+    """
+    fig = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=("Loss", "MAE"),
+        specs=[[{"secondary_y": False}, {"secondary_y": False}]]
+    )
+    
+    epochs = range(1, len(history.get('loss', [])) + 1)
+    
+    # Plot loss
+    fig.add_trace(
+        go.Scatter(x=list(epochs), y=history['loss'], mode='lines', 
+                   name='Train Loss', line=dict(color=BLUE_TRAIN, width=2)),
+        row=1, col=1
+    )
+    if 'val_loss' in history:
+        fig.add_trace(
+            go.Scatter(x=list(epochs), y=history['val_loss'], mode='lines',
+                       name='Val Loss', line=dict(color=BLUE_TEST, width=2)),
+            row=1, col=1
+        )
+    
+    # Plot MAE
+    if 'mae' in history:
+        fig.add_trace(
+            go.Scatter(x=list(epochs), y=history['mae'], mode='lines',
+                       name='Train MAE', line=dict(color=BLUE_TRAIN, width=2, dash='dash')),
+            row=1, col=2
+        )
+    if 'val_mae' in history:
+        fig.add_trace(
+            go.Scatter(x=list(epochs), y=history['val_mae'], mode='lines',
+                       name='Val MAE', line=dict(color=BLUE_TEST, width=2, dash='dash')),
+            row=1, col=2
+        )
+    
+    fig.update_xaxes(title_text="Epoch", row=1, col=1)
+    fig.update_xaxes(title_text="Epoch", row=1, col=2)
+    fig.update_yaxes(title_text="Loss (MSE)", row=1, col=1)
+    fig.update_yaxes(title_text="MAE", row=1, col=2)
+    
+    fig.update_layout(
+        title={'text': title, 'x': 0.5, 'xanchor': 'center', 'font': {'size': 18}},
+        height=400,
+        hovermode='x unified',
+        template='plotly_white'
+    )
+    
+    fig.show()
+    return fig
