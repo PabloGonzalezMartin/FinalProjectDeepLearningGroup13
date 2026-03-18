@@ -8,16 +8,9 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 import numpy as np
 
-def create_sequences(data, lookback=168, forecast_len=24):
-    X, y_seq = [], []
-    for i in range(lookback, len(data) - forecast_len + 1):
-        X.append(data[i-lookback:i, 0])
-        y_seq.append(data[i:i+forecast_len, 0])
-    return np.array(X), np.array(y_seq)
-
-def build_lstm_model(lookback, forecast_horizon, learning_rate=0.001):
+def build_lstm_model(lookback, forecast_horizon, num_features=1, learning_rate=0.001):
     """Build and compile bidirectional LSTM model."""
-    inputs = Input(shape=(lookback, 1))
+    inputs = Input(shape=(lookback, num_features))
     x = Bidirectional(LSTM(units=128, return_sequences=True))(inputs)
     x = Dropout(0.2)(x)
     x = Bidirectional(LSTM(units=64, return_sequences=False))(x)
