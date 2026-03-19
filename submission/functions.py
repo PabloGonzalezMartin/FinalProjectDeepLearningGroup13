@@ -1,12 +1,27 @@
 
 import keras
-from statsmodels.tsa.seasonal import STL
 from tensorflow.keras import layers
 
 from tensorflow.keras.layers import GlobalAveragePooling1D, MultiHeadAttention, Dense, Dropout, LayerNormalization, Input, Bidirectional, LSTM
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 import numpy as np
+
+def make_windows(features, targets, input_len, forecast_len):
+    """Create sliding windows of features and corresponding target forecasts."""
+    X, y_win = [], []
+    for i in range(len(features) - input_len - forecast_len + 1):
+        X.append(features[i : i + input_len])
+        y_win.append(targets[i + input_len : i + input_len + forecast_len])
+    return np.array(X), np.array(y_win)
+
+def create_sequences(data, lookback=168, forecast_len=24):
+    """Create sequences of input data and corresponding forecast targets."""
+    X, y_seq = [], []
+    for i in range(lookback, len(data) - forecast_len + 1):
+        X.append(data[i-lookback:i, 0])
+        y_seq.append(data[i:i+forecast_len, 0])
+    return np.array(X), np.array(y_seq)
 
 def build_lstm_model(lookback, forecast_horizon, num_features=1, learning_rate=0.001):
     """Build and compile bidirectional LSTM model."""
@@ -27,10 +42,9 @@ def build_lstm_model(lookback, forecast_horizon, num_features=1, learning_rate=0
     )
     return model
 
-# ─────────────────────────────────────────────────────────────
-# Positional Encoding Layer
-# ─────────────────────────────────────────────────────────────
+
 class PositionalEncoding(layers.Layer):
+    """Positional Encoding Layer for Transformer models."""
     def __init__(self, max_len=512, **kwargs):
         super().__init__(**kwargs)
         self.max_len = max_len
@@ -57,10 +71,8 @@ class PositionalEncoding(layers.Layer):
         seq_len = tf.shape(x)[1]
         return x + tf.cast(self.pe[:seq_len, :], x.dtype)
 
-# ─────────────────────────────────────────────────────────────
-# Transformer Encoder Block
-# ─────────────────────────────────────────────────────────────
 class TransformerEncoderBlock(layers.Layer):
+    """Transformer Encoder Block with Multi-Head Attention and Feed-Forward Network."""
     def __init__(self, d_model, num_heads, ff_dim, dropout=0.1, **kwargs):
         super().__init__(**kwargs)
         self.d_model   = d_model
@@ -100,11 +112,9 @@ class TransformerEncoderBlock(layers.Layer):
         x = self.norm2(x + self.drop2(ffn_out, training=training))
         return x
 
-# ─────────────────────────────────────────────────────────────
-# Model Builder Function
-# ─────────────────────────────────────────────────────────────
+
 def build_transformer_model(input_len, forecast_horizon, learning_rate=0.001, num_features=2):
-    """Build and compile Transformer model with positional encoding."""
+    """Build and compile Transformer model with positional encoding and two encoder blocks."""
     input_layer = Input(shape=(input_len, num_features))
     x = Dense(64)(input_layer)
     x = PositionalEncoding(max_len=input_len * 2)(x)
@@ -124,12 +134,3 @@ def build_transformer_model(input_len, forecast_horizon, learning_rate=0.001, nu
     )
     return model
 
-# ─────────────────────────────────────────────────────────────
-# Create Sliding Windows Function
-# ─────────────────────────────────────────────────────────────
-def make_windows(features, targets, input_len, forecast_len):
-    X, y_win = [], []
-    for i in range(len(features) - input_len - forecast_len + 1):
-        X.append(features[i : i + input_len])
-        y_win.append(targets[i + input_len : i + input_len + forecast_len])
-    return np.array(X), np.array(y_win)
